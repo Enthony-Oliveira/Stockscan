@@ -1,21 +1,18 @@
 import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { doc, getDoc, setDoc, updateDoc } from "firebase/firestore";
-import { db } from "../firebase"; // Importa a conexão que acabamos de criar
+import { db } from "../firebase";
 
 export default function Details() {
   const { id } = useParams();
   const navigate = useNavigate();
 
-  // Estados da nossa tela
   const [loading, setLoading] = useState(true);
   const [isNewProduct, setIsNewProduct] = useState(false);
 
-  // Dados do produto
   const [nomeProduto, setNomeProduto] = useState("");
   const [quantidade, setQuantidade] = useState(0);
 
-  // Assim que a tela abre, ele busca o produto no Firebase
   useEffect(() => {
     async function buscarProduto() {
       try {
@@ -23,12 +20,10 @@ export default function Details() {
         const docSnap = await getDoc(docRef);
 
         if (docSnap.exists()) {
-          // Produto EXISTE no banco
           setNomeProduto(docSnap.data().nome_produto);
           setQuantidade(docSnap.data().quantidade);
           setIsNewProduct(false);
         } else {
-          // Produto NÃO EXISTE (Vamos cadastrar)
           setIsNewProduct(true);
         }
       } catch (error) {
@@ -44,7 +39,6 @@ export default function Details() {
     buscarProduto();
   }, [id]);
 
-  // Função para cadastrar um produto novo
   const handleCadastrar = async () => {
     try {
       await setDoc(doc(db, "produtos", id), {
@@ -60,7 +54,6 @@ export default function Details() {
     }
   };
 
-  // Função para atualizar estoque de produto existente
   const handleAtualizarEstoque = async () => {
     try {
       await updateDoc(doc(db, "produtos", id), {
@@ -125,7 +118,6 @@ export default function Details() {
         </p>
         <h3 style={{ margin: "0 0 20px 0", color: "#333" }}>{id}</h3>
 
-        {/* NOME DO PRODUTO */}
         <label
           style={{
             display: "block",
@@ -140,7 +132,7 @@ export default function Details() {
           type="text"
           value={nomeProduto}
           onChange={(e) => setNomeProduto(e.target.value)}
-          disabled={!isNewProduct} // Se já existe, trava o nome.
+          disabled={!isNewProduct}
           placeholder="Ex: Caixa de Parafusos"
           style={{
             width: "100%",
@@ -152,7 +144,6 @@ export default function Details() {
           }}
         />
 
-        {/* QUANTIDADE EM ESTOQUE */}
         <label
           style={{
             display: "block",
@@ -220,7 +211,6 @@ export default function Details() {
         </div>
       </div>
 
-      {/* BOTÃO DINÂMICO (Cadastra ou Atualiza) */}
       <button
         onClick={isNewProduct ? handleCadastrar : handleAtualizarEstoque}
         style={{
